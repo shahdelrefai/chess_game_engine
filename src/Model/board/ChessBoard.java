@@ -102,6 +102,13 @@ public class ChessBoard {
         return isOutOfCheck;
     }
 
+    public boolean isCheckmate(PlayerColor player) {
+        Square kingSquare = findKingSquare(player);
+        Piece king = kingSquare.getPiece();
+
+        return king.getLegalMoves(this, kingSquare).isEmpty();
+    }
+
     public boolean isInCheck(PlayerColor player) {
         Square kingSquare = findKingSquare(player);
         PlayerColor opponent = (player == PlayerColor.WHITE) ? PlayerColor.BLACK : PlayerColor.WHITE;

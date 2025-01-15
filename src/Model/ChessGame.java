@@ -152,14 +152,13 @@ public class ChessGame {
             return 5;
         }
 
-
-        if (isCheckmate(changePlayerTurn())) {
+        if(chessBoard.isInCheck(changePlayerTurn()) && chessBoard.isCheckmate(changePlayerTurn()))
+        {
             this.gameWinner = gameTurn;
             this.gameStatus = GameStatus.Checkmate;
             prints[6] = 1;
             return 200;
         }
-
 
         if(chessBoard.isInCheck(changePlayerTurn())) prints[5] = 1;
 

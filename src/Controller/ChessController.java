@@ -6,7 +6,6 @@ import Model.board.Square;
 import Model.pieces.King;
 import Model.pieces.Pawn;
 import Model.pieces.Piece;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -67,6 +66,7 @@ public class ChessController {
 
         public void printChessBoard() {
             boolean isInCheck = chessGame.getChessBoard().isInCheck(chessGame.getGameTurn());
+            boolean checkmate = chessGame.getGameStatus() == ChessGame.GameStatus.Checkmate;
             List<Square> legalMoves = movedPiece != null && movedPiece.getPieceColor() == chessGame.getGameTurn()? currentSquare.getPiece().getLegalMoves(chessGame.getChessBoard(), currentSquare) : Collections.emptyList();
             removeAll();
             for(GuiSquare guiSquare : guiSquares) {
@@ -74,7 +74,9 @@ public class ChessController {
                 Piece currentPiece = currSquare.getPiece();
                 if(isInCheck && currentPiece instanceof King && currentPiece.getPieceColor() == chessGame.getGameTurn())
                     guiSquare.drawSquare(redSquare);
-                else if(legalMoves.stream().anyMatch(square -> square.equals(currSquare)))
+                else if (checkmate && currentPiece instanceof King && currentPiece.getPieceColor() == chessGame.changePlayerTurn()) {
+                    guiSquare.drawSquare(redSquare);
+                } else if(legalMoves.stream().anyMatch(square -> square.equals(currSquare)))
                     guiSquare.drawSquare(yellowSquare);
                 else
                     guiSquare.drawSquare(null);
@@ -82,6 +84,7 @@ public class ChessController {
             }
             validate();
             repaint();
+            if(chessGame.getGameStatus() != ChessGame.GameStatus.InProgress) endGame();
         }
 
         public void undoMove() {
@@ -100,6 +103,22 @@ public class ChessController {
             }
         }
 
+        private void showGameOverPopup(String message) {
+            System.out.println("hereeeeee");
+            JOptionPane.showMessageDialog(null, message, "Game Over", JOptionPane.INFORMATION_MESSAGE);
+            System.exit(0);
+        }
+
+        public void endGame() {
+            switch (chessGame.getGameStatus()) {
+                case Checkmate ->
+                        showGameOverPopup("Checkmate! " + chessGame.getGameWinner().toString() + " wins!");
+                case Stalemate ->
+                        showGameOverPopup("Stalemate! The game is a draw.");
+                case InsufficientMaterial ->
+                        showGameOverPopup("Insufficient material. The game is a draw.");
+            }
+        }
     }
 
     private class GuiSquare extends JPanel {
@@ -159,18 +178,6 @@ public class ChessController {
                                 successfulMove = false;
                             }
                             guiBoardContains.printChessBoard();
-
-                            switch (chessGame.getGameStatus()) {
-                                case Checkmate:
-                                    showGameOverPopup("Checkmate! " + chessGame.getGameWinner().toString() + " wins!");
-                                    break;
-                                case Stalemate:
-                                    showGameOverPopup("Stalemate! The game is a draw.");
-                                    break;
-                                case InsufficientMaterial:
-                                    showGameOverPopup("Insufficient material. The game is a draw.");
-                                    break;
-                            }
                         }
                     });
                 }
@@ -256,12 +263,6 @@ public class ChessController {
                     break;
             }
         }
-
-        private void showGameOverPopup(String message) {
-            JOptionPane.showMessageDialog(null, message, "Game Over", JOptionPane.INFORMATION_MESSAGE);
-            System.exit(0);
-        }
-
 
     }
 
